@@ -1,0 +1,44 @@
+name: azuredevops/azure-functions-nodejs-samples.git_(3)
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  build:
+    runs-on:
+      - self-hosted
+      - myvm
+    strategy:
+      matrix:
+        NODE_VERSION:
+        - 18.x
+        - 20.x
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: Install Node.js
+      uses: actions/setup-node@v4.0.0
+      with:
+        node-version: "${{ matrix.NODE_VERSION }}"
+    - name: npm ci (ts)
+      run: npm ci
+      working-directory: ts
+    - name: npm run build (ts)
+      run: npm run build
+      working-directory: ts
+    - name: npm run lint (ts)
+      run: npm run lint
+      working-directory: ts
+    - name: npm ci (js)
+      run: npm ci
+      working-directory: js
+    - name: npm run lint (js)
+      run: npm run lint
+      working-directory: js
+    - uses: actions/upload-artifact@v4.1.0
+      with:
+        name: build
+        path: "${{ github.workspace }}"
